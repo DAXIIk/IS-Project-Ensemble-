@@ -108,26 +108,37 @@ elif page == "NN Image: Testing":
         st.write(f"Confidence Score: {score:.4f}")
 
 # --- Page 5: Sleep Health (โมเดลใหม่ที่คุณเพิ่ม) ---
+# --- Page 5: Sleep Health ---
 elif page == "Sleep Health: AI Predictor":
     st.title("💤 Sleep Disorder Analysis")
-    st.subheader("Data Cleansing Info")
-    st.info("โมเดลนี้มีการทำ Preprocessing โดยแยกค่า 'Blood Pressure' (เช่น 120/80) ออกเป็นค่าตัวเลข Systolic และ Diastolic")
     
     col1, col2 = st.columns(2)
     with col1:
+        s_gender = st.selectbox("เพศ", ["Male", "Female"])
         s_age = st.number_input("อายุ (ปี)", 10, 100, 30)
         s_dur = st.slider("ชั่วโมงการนอน", 4.0, 10.0, 7.0)
         s_stress = st.slider("ระดับความเครียด (1-10)", 1, 10, 5)
     with col2:
         s_step = st.number_input("จำนวนก้าวต่อวัน", 0, 20000, 5000)
         s_bmi = st.selectbox("กลุ่ม BMI", ["Normal", "Overweight", "Obese"])
+        # เพิ่มค่าความดันโลหิต (แยกเป็น 2 ตัวตามที่ AI ต้องการ)
+        s_sys = st.number_input("ความดันตัวบน (Systolic)", 90, 200, 120)
+        s_dia = st.number_input("ความดันตัวล่าง (Diastolic)", 60, 130, 80)
     
     if st.button("วิเคราะห์สุขภาพการนอน"):
-        # แปลง BMI เป็นเลข (ตัวอย่างการ Cleansing ในตัว)
+        # 1. Data Cleansing (แปลงค่าให้เป็นตัวเลขเหมือนตอนเทรน)
+        gender_val = 1 if s_gender == "Male" else 0
         bmi_map = {"Normal": 0, "Overweight": 1, "Obese": 2}
-        # จำลองการจัดเรียง Feature ให้ตรงกับที่เทรนมา (ต้องเช็คจาก Colab อีกทีว่าเรียงยังไง)
-        # ตัวอย่าง: [Age, Sleep Duration, Physical Activity, Stress Level, BMI Category]
-        s_input = np.array([[s_age, s_dur, s_step, s_stress, bmi_map[s_bmi]]])
-        s_res = sleep_model.predict(s_input)
         
-        st.write(f"### ผลการทำนาย: {s_res[0]}")
+        # 2. จัดเรียง Features (ต้องเรียงให้ตรงกับลำดับใน Colab)
+        # ตัวอย่างลำดับทั่วไป: Gender, Age, Sleep Duration, Physical Activity, Stress Level, BMI, Systolic, Diastolic
+        try:
+            s_input = np.array([[gender_val, s_age, s_dur, s_step, s_stress, bmi_map[s_bmi], s_sys, s_dia]])
+            s_res = sleep_model.predict(s_input)
+            
+            st.success(f"### ผลการทำนาย: {s_res[0]}")
+            if s_res[0] != "None":
+                st.warning("⚠️ พบความเสี่ยงผิดปกติทางการนอน")
+        except ValueError as e:
+            st.error(f"❌ จำนวนปัจจัยไม่ตรงกับโมเดล: {e}")
+            st.info("โปรดเช็คใน Colab ว่าตอนใช้ model.fit(X, y) ตัวแปร X มีกี่คอลัมน์")
