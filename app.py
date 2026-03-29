@@ -107,7 +107,6 @@ elif page == "NN Image: Testing":
         st.subheader(f"ผลทำนาย: {label}")
         st.write(f"Confidence Score: {score:.4f}")
 
-# --- Page 5: Sleep Health (โมเดลใหม่ที่คุณเพิ่ม) ---
 # --- Page 5: Sleep Health ---
 elif page == "Sleep Health: AI Predictor":
     st.title("💤 Sleep Disorder Analysis")
@@ -117,28 +116,34 @@ elif page == "Sleep Health: AI Predictor":
         s_gender = st.selectbox("เพศ", ["Male", "Female"])
         s_age = st.number_input("อายุ (ปี)", 10, 100, 30)
         s_dur = st.slider("ชั่วโมงการนอน", 4.0, 10.0, 7.0)
-        s_stress = st.slider("ระดับความเครียด (1-10)", 1, 10, 5)
     with col2:
-        s_step = st.number_input("จำนวนก้าวต่อวัน", 0, 20000, 5000)
+        s_act = st.number_input("ระดับกิจกรรมทางกาย (Physical Activity Level)", 0, 100, 60)
+        s_stress = st.slider("ระดับความเครียด (Stress Level 1-10)", 1, 10, 5)
         s_bmi = st.selectbox("กลุ่ม BMI", ["Normal", "Overweight", "Obese"])
-        # เพิ่มค่าความดันโลหิต (แยกเป็น 2 ตัวตามที่ AI ต้องการ)
-        s_sys = st.number_input("ความดันตัวบน (Systolic)", 90, 200, 120)
-        s_dia = st.number_input("ความดันตัวล่าง (Diastolic)", 60, 130, 80)
     
     if st.button("วิเคราะห์สุขภาพการนอน"):
-        # 1. Data Cleansing (แปลงค่าให้เป็นตัวเลขเหมือนตอนเทรน)
-        gender_val = 1 if s_gender == "Male" else 0
-        bmi_map = {"Normal": 0, "Overweight": 1, "Obese": 2}
+        # 1. Cleansing ข้อมูลให้ตรงกับที่เทรนใน Colab
+        gender_val = 0 if s_gender == "Male" else 1 # ตาม map({'Male': 0, 'Female': 1})
         
-        # 2. จัดเรียง Features (ต้องเรียงให้ตรงกับลำดับใน Colab)
-        # ตัวอย่างลำดับทั่วไป: Gender, Age, Sleep Duration, Physical Activity, Stress Level, BMI, Systolic, Diastolic
+        # BMI ใน Colab คุณใช้ .cat.codes ซึ่งมักจะเรียงตามตัวอักษร: Normal=0, Obese=1, Overweight=2
+        # (แนะนำให้เช็คใน Colab อีกทีเพื่อความชัวร์ แต่เบื้องต้นลองตามนี้ครับ)
+        bmi_map = {"Normal": 0, "Obese": 1, "Overweight": 2} 
+        
+        # 2. จัดเรียง Features ให้ครบ 6 ตัวตามที่โมเดลต้องการเป๊ะๆ
+        # ลำดับ: Gender, Age, Sleep Duration, Physical Activity Level, Stress Level, BMI Category
         try:
-            s_input = np.array([[gender_val, s_age, s_dur, s_step, s_stress, bmi_map[s_bmi], s_sys, s_dia]])
+            s_input = np.array([[
+                gender_val, 
+                s_age, 
+                s_dur, 
+                s_act, 
+                s_stress, 
+                bmi_map[s_bmi]
+            ]])
+            
             s_res = sleep_model.predict(s_input)
             
             st.success(f"### ผลการทำนาย: {s_res[0]}")
-            if s_res[0] != "None":
-                st.warning("⚠️ พบความเสี่ยงผิดปกติทางการนอน")
-        except ValueError as e:
-            st.error(f"❌ จำนวนปัจจัยไม่ตรงกับโมเดล: {e}")
-            st.info("โปรดเช็คใน Colab ว่าตอนใช้ model.fit(X, y) ตัวแปร X มีกี่คอลัมน์")
+            
+        except Exception as e:
+            st.error(f"เกิดข้อผิดพลาด: {e}")
