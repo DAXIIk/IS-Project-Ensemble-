@@ -9,7 +9,7 @@ from PIL import Image
 @st.cache_resource
 def load_my_models():
     ml_model = pickle.load(open('ensemble_titanic.pkl', 'rb'))
-    nn_model = load_model('nn_ai_vs_real_v2.keras')
+    nn_model = load_model('nn_ai_vs_real.h5')
     return ml_model, nn_model
 
 # ป้องกัน Error ถ้ายังไม่มีไฟล์โมเดล
@@ -30,7 +30,7 @@ if page == "ML Theory":
     st.write("Features: Pclass, Sex, Age, SibSp, Parch, Fare, Embarked")
     
     # โชว์ข้อมูลดิบ (Data Cleaning)
-    df = pd.read_csv('Titanic-Dataset.csv')
+    df = pd.read_csv('train.csv')
     st.write("Sample Data:", df.head())
     
     st.subheader("2. Ensemble Model Structure")
