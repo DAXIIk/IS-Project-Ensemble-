@@ -127,7 +127,13 @@ elif page == "Sleep Health: AI Predictor":
         
         # BMI ใน Colab คุณใช้ .cat.codes ซึ่งมักจะเรียงตามตัวอักษร: Normal=0, Obese=1, Overweight=2
         # (แนะนำให้เช็คใน Colab อีกทีเพื่อความชัวร์ แต่เบื้องต้นลองตามนี้ครับ)
-        bmi_map = {"Normal": 0, "Obese": 1, "Overweight": 2} 
+        # แก้ไข bmi_map ให้ตรงกับลำดับใน Colab (Index 0-3)
+        bmi_map = {
+            "Normal": 0, 
+            "Normal Weight": 1, 
+            "Obese": 2, 
+            "Overweight": 3
+        } 
         
         # 2. จัดเรียง Features ให้ครบ 6 ตัวตามที่โมเดลต้องการเป๊ะๆ
         # ลำดับ: Gender, Age, Sleep Duration, Physical Activity Level, Stress Level, BMI Category
