@@ -5,25 +5,130 @@ import pickle
 from tensorflow.keras.models import load_model
 from PIL import Image
 
-# --- ตั้งค่าหน้าเว็บแบบเท่ๆ Dark Mode ---
-st.set_page_config(page_title="AI Project Portfolio", page_icon="🌙", layout="wide")
+# --- CONFIG & FUTURISTIC CSS ---
+st.set_page_config(page_title="AI Project Portfolio | Pro Edition", page_icon="⚡", layout="wide")
 
+# CSS สำหรับตกแต่งสไตล์ Modern High-Tech / Futuristic Dark UI
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; color: #ffffff; }
-    .stButton>button { 
-        width: 100%; border-radius: 10px; height: 3.5em; 
-        background-image: linear-gradient(to right, #1e40af, #3b82f6); 
-        color: white; border: none; font-weight: bold; transition: 0.3s;
+    /* ตั้งค่าพื้นหลังหลักให้เป็นสีดำลึก */
+    .main { 
+        background-color: #05070a; 
+        color: #e0e6ed; 
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
-    .stButton>button:hover { transform: scale(1.02); opacity: 0.9; }
-    h1, h2, h3 { color: #60a5fa; }
-    .stSelectbox, .stSlider, .stNumberInput { background-color: #1f2937; border-radius: 8px; }
-    .sidebar .sidebar-content { background-color: #111827; }
+    
+    /* สไตล์ Sidebar แบบ Glassmorphism พร้อมแสงนีออน */
+    [data-testid="stSidebar"] {
+        background: rgba(10, 15, 25, 0.7) !important;
+        backdrop-filter: blur(10px) !important;
+        border-right: 1px solid rgba(100, 200, 255, 0.1);
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    }
+    
+    [data-testid="stSidebar"] .sidebar-content {
+        background: transparent !important;
+    }
+    
+    /* ปรับแต่งหัวข้อ (H1, H2, H3) ให้มีแสง Glow */
+    h1, h2, h3 { 
+        color: #00e6ff !important; 
+        font-weight: 700 !important;
+        text-shadow: 0 0 10px rgba(0, 230, 255, 0.5);
+    }
+    
+    /* ปรับแต่งปุ่มให้ดู Modern, มี Gradient และ Glow */
+    .stButton>button { 
+        width: 100%; 
+        border-radius: 5px; 
+        height: 3.5em; 
+        background-image: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #00e6ff 100%); 
+        color: white; 
+        border: 1px solid rgba(0, 230, 255, 0.3); 
+        font-weight: bold; 
+        font-size: 1.1em;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .stButton>button:hover { 
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 230, 255, 0.6);
+        border: 1px solid #00e6ff;
+        color: #fff;
+    }
+    
+    /* ปรับแต่งช่องกรอกข้อมูล (Selectbox, Slider, etc.) */
+    .stSelectbox, .stSlider, .stNumberInput { 
+        background-color: #0f172a; 
+        border-radius: 8px; 
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+    
+    .stSelectbox:hover, .stSlider:hover, .stNumberInput:hover {
+        border-color: rgba(0, 230, 255, 0.5);
+    }
+    
+    /* สไตล์ Sidebar Radio Buttons ให้ดู Modern */
+    [data-testid="stSidebar"] .stRadio > label {
+        color: #60a5fa !important;
+        font-weight: bold;
+    }
+    
+    [data-testid="stSidebar"] .stRadio > div {
+        background-color: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        padding: 5px;
+    }
+    
+    /* ปรับแต่ง Alert และ Info Boxes */
+    .stAlert {
+        border-radius: 10px;
+        border: 1px solid;
+    }
+    
+    .stAlert.st-b8 { /* Info Box */
+        background-color: rgba(30, 64, 175, 0.2);
+        border-color: #1e40af;
+        color: #bfdbfe;
+    }
+    
+    .stAlert.st-b9 { /* Success Box */
+        background-color: rgba(16, 185, 129, 0.2);
+        border-color: #10b981;
+        color: #a7f3d0;
+    }
+    
+    .stAlert.st-ba { /* Warning Box */
+        background-color: rgba(245, 158, 11, 0.2);
+        border-color: #f59e0b;
+        color: #fef3c7;
+    }
+    
+    .stAlert.st-bb { /* Error Box */
+        background-color: rgba(239, 68, 68, 0.2);
+        border-color: #ef4444;
+        color: #fecaca;
+    }
+    
+    /* ปรับ Padding ให้สมดุล */
+    .reportview-container .main .block-container { 
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+    
+    /* ตกแต่ง Expander */
+    .st-dg {
+        background-color: #0f172a;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 1. ส่วนโหลดโมเดล ---
+# --- 1. LOAD MODELS (Cache ไว้จะได้ลื่นๆ) ---
 @st.cache_resource
 def load_all_models():
     ml_model = pickle.load(open('ensemble_titanic.pkl', 'rb'))
@@ -36,9 +141,9 @@ try:
 except Exception as e:
     st.error(f"เฮ้ย! หาไฟล์โมเดลไม่เจอว่ะ เช็คชื่อไฟล์บน GitHub แป๊บนึงนะ: {e}")
 
-# --- 2. Sidebar Menu ---
-st.sidebar.title("🚀 AI Multi-Project")
-page = st.sidebar.radio("เลือกหน้าที่จะไป:", [
+# --- 2. SIDEBAR NAVIGATION ---
+st.sidebar.markdown("# 🛠️ AI Project Hub")
+page = st.sidebar.radio("อยากไปหน้าไหนดี?", [
     "🏠 Dashboard Overview",
     "📊 Titanic Theory (ML)", 
     "🔮 Titanic Testing",
@@ -49,18 +154,18 @@ page = st.sidebar.radio("เลือกหน้าที่จะไป:", [
 
 # --- PAGE: DASHBOARD OVERVIEW ---
 if page == "🏠 Dashboard Overview":
-    st.title("🌙 ยินดีต้อนรับเข้าสู่โปรเจค AI!")
+    st.title("⚡ ยินดีต้อนรับเข้าสู่ AI Project Hub!")
     st.write("เว็บนี้รวมโมเดลที่เราตั้งใจทำ ทั้งสายสถิติ (ML) และสายประมวลผลภาพ (NN) รายละเอียดแต่ละตัวอยู่ข้างล่างนี้เลย!")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.info("### 📂 ชุดข้อมูลที่ 1: Titanic\nพยากรณ์การรอดชีวิตจากเหตุการณ์เรือล่ม โดยใช้ข้อมูลพื้นฐานของผู้โดยสาร")
+        st.info("### 📦 ชุดข้อมูลที่ 1: Titanic\nพยากรณ์การรอดชีวิตจากเหตุการณ์เรือล่ม โดยใช้ข้อมูลพื้นฐานของผู้โดยสาร")
     with col2:
-        st.info("### 📂 ชุดข้อมูลที่ 2: Sleep Health\nวิเคราะห์พฤติกรรมการใช้ชีวิต เพื่อประเมินความเสี่ยงโรคที่เกิดจากการนอน")
+        st.info("### 📦 ชุดข้อมูลที่ 2: Sleep Health\nวิเคราะห์พฤติกรรมการใช้ชีวิต เพื่อประเมินความเสี่ยงโรคที่เกิดจากการนอน")
 
 # --- PAGE: ML TITANIC THEORY ---
 elif page == "📊 Titanic Theory (ML)":
-    st.title("📊 ทฤษฎีโมเดล Titanic (Ensemble Learning)")
+    st.title("🚢 เจาะลึกโมเดล Titanic (Ensemble Learning)")
     
     st.subheader("📍 ที่มาของ Dataset")
     st.write("ข้อมูลชุดนี้มาจากเว็บไซต์ **Kaggle** (Titanic: Machine Learning from Disaster) ซึ่งเป็นฐานข้อมูลจริงของเรือไททานิคที่ล่มในปี 1912")
@@ -86,28 +191,28 @@ elif page == "📊 Titanic Theory (ML)":
 
 # --- PAGE: ML TITANIC TESTING ---
 elif page == "🔮 Titanic Testing":
-    st.title("🔮 มาลองทำนายกันว่าจะรอดไหม?")
+    st.title("🔮 ลองทำนายดูว่าจะรอดไหม?")
     col1, col2 = st.columns(2)
     with col1:
-        pclass = st.selectbox("ชั้นที่นั่ง (1=VIP, 3=ประหยัด)", [1, 2, 3])
-        sex = st.radio("เพศ", ["Male", "Female"])
+        pclass = st.selectbox("เลือกชั้นที่นั่ง (1=VIP, 3=ประหยัด)", [1, 2, 3])
+        sex = st.radio("เลือกเพศ", ["Male", "Female"])
         age = st.slider("อายุเท่าไหร่?", 0, 80, 25)
     with col2:
-        fare = st.number_input("ราคาตั๋ว (Fare)", 0.0, 500.0, 32.0)
+        fare = st.number_input("ราคาตั๋ว (ยิ่งแพงยิ่งมีโอกาสรอดนะ)", 0.0, 500.0, 32.0)
     
-    if st.button("PREDICT NOW"):
+    if st.button("RUN PREDICTION"):
         sex_val = 1 if sex == "Male" else 0
         input_data = np.array([[pclass, sex_val, age, 0, 0, fare, 0]])
         res = ml_model.predict(input_data)
         if res[0] == 1:
             st.balloons()
-            st.success("✅ รอดชีวิตว่ะ! ดวงแข็งจริงๆ")
+            st.success("✅ 🎉 ยินดีด้วย! คุณมีโอกาสรอดสูงมาก")
         else:
-            st.error("💀 ไม่รอดว่ะ... เสียใจด้วยนะ")
+            st.error("💀 เสียใจด้วย... โอกาสรอดยากนิดนึงนะ")
 
 # --- PAGE: NN THEORY ---
 elif page == "🧠 AI vs Real Theory (NN)":
-    st.title("🧠 ทฤษฎีโมเดลแยกรูปภาพ AI vs Real")
+    st.title("🤖 ทฤษฎีโมเดลแยกรูปภาพ AI vs Real")
     
     st.subheader("📍 ที่มาของ Dataset")
     st.write("ใช้ชุดรูปภาพจากเว็บไซต์ **Kaggle** (rhythmghai/ai-vs-real-images-dataset) รวบรวมภาพถ่ายจริงเทียบกับภาพที่เจนโดย Midjourney และ Stable Diffusion")
@@ -127,8 +232,8 @@ elif page == "🧠 AI vs Real Theory (NN)":
 
 # --- PAGE: NN TESTING ---
 elif page == "📷 AI vs Real Testing":
-    st.title("📷 มาลองเช็คดูว่ารูปนี้ใครวาด?")
-    uploaded_file = st.file_uploader("ส่งรูปมาเล้ยย...", type=["jpg", "png", "jpeg"])
+    st.title("🖼️ ลองส่งรูปมาตรวจดู")
+    uploaded_file = st.file_uploader("ส่งรูปมาเล้ยย (JPG/PNG)", type=["jpg", "png", "jpeg"])
     if uploaded_file:
         img = Image.open(uploaded_file).convert('RGB').resize((128, 128))
         st.image(img, caption='รูปที่ส่งมา', width=300)
@@ -172,7 +277,7 @@ elif page == "💤 Sleep Health Theory & Predict":
     col1, col2 = st.columns(2)
     with col1:
         s_gender = st.selectbox("เลือกเพศ", ["Male", "Female"])
-        s_age = st.number_input("อายุคุณ (ปี)", 10, 80, 30)
+        s_age = st.number_input("อายุคุณเท่าไหร่?", 10, 80, 30)
         s_dur = st.slider("ชั่วโมงที่นอนต่อวัน", 4.0, 10.0, 7.0)
     with col2:
         s_act = st.slider("ระดับกิจกรรมทางกาย (0-100)", 0, 100, 60)
