@@ -23,7 +23,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 1. ส่วนโหลดโมเดล (Cache ไว้จะได้ลื่นๆ) ---
+# --- 1. ส่วนโหลดโมเดล ---
 @st.cache_resource
 def load_all_models():
     ml_model = pickle.load(open('ensemble_titanic.pkl', 'rb'))
@@ -50,30 +50,39 @@ page = st.sidebar.radio("เลือกหน้าที่จะไป:", [
 # --- PAGE: DASHBOARD OVERVIEW ---
 if page == "🏠 Dashboard Overview":
     st.title("🌙 ยินดีต้อนรับเข้าสู่โปรเจค AI!")
-    st.write("เว็บนี้รวมโมเดลที่เราตั้งใจทำ ทั้งสายสถิติและสายภาพ ลองเลือกเล่นที่แถบซ้ายมือได้เลยครับ")
+    st.write("เว็บนี้รวมโมเดลที่เราตั้งใจทำ ทั้งสายสถิติ (ML) และสายประมวลผลภาพ (NN) รายละเอียดแต่ละตัวอยู่ข้างล่างนี้เลย!")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.info("### 📂 ชุดข้อมูลที่ 1: Titanic\nเน้นพยากรณ์การรอดชีวิตจากเหตุการณ์เรือล่ม โดยใช้สถิติผู้โดยสารจริง")
+        st.info("### 📂 ชุดข้อมูลที่ 1: Titanic\nพยากรณ์การรอดชีวิตจากเหตุการณ์เรือล่ม โดยใช้ข้อมูลพื้นฐานของผู้โดยสาร")
     with col2:
-        st.info("### 📂 ชุดข้อมูลที่ 2: Sleep Health\nวิเคราะห์พฤติกรรมการนอน เพื่อดูความเสี่ยงโรคต่างๆ เช่น นอนไม่หลับ")
+        st.info("### 📂 ชุดข้อมูลที่ 2: Sleep Health\nวิเคราะห์พฤติกรรมการใช้ชีวิต เพื่อประเมินความเสี่ยงโรคที่เกิดจากการนอน")
 
 # --- PAGE: ML TITANIC THEORY ---
 elif page == "📊 Titanic Theory (ML)":
-    st.title("📊 เจาะลึกทฤษฎีไททานิค")
-    st.subheader("📍 ที่มาของข้อมูล")
-    st.write("โหลดมาจาก Kaggle ครับ เป็น Dataset ระดับตำนานที่คนหัดทำ AI ต้องผ่านทุกคน!")
+    st.title("📊 ทฤษฎีโมเดล Titanic (Ensemble Learning)")
     
-    st.subheader("🧹 การเตรียมข้อมูล (Data Cleansing)")
-    st.write("ข้อมูลมันไม่ได้มาสวยๆ นะครับ เราต้องจัดการก่อน:")
+    st.subheader("📍 ที่มาของ Dataset")
+    st.write("ข้อมูลชุดนี้มาจากเว็บไซต์ **Kaggle** (Titanic: Machine Learning from Disaster) ซึ่งเป็นฐานข้อมูลจริงของเรือไททานิคที่ล่มในปี 1912")
+    
+    st.subheader("🧬 Features (ปัจจัยที่ใช้พยากรณ์)")
     st.markdown("""
-    * **จัดการค่าว่าง:** ใครไม่ยอมบอกอายุ เราเอา 'อายุเฉลี่ย' ของทุกคนไปเติมให้
-    * **แปลงร่างข้อมูล:** AI อ่านคำว่า 'ชาย/หญิง' ไม่เป็น เราเลยเปลี่ยนเป็นเลข 1 กับ 0
-    * **คัดเลือกปัจจัย:** เราหยิบแค่ Pclass, Sex, Age, Fare มาใช้ เพราะพวกนี้แหละตัวตัดสินชีวิต
+    - **Pclass:** ชั้นที่นั่งผู้โดยสาร (1, 2, 3) สะท้อนถึงฐานะและตำแหน่งห้องพักบนเรือ
+    - **Sex:** เพศของผู้โดยสาร (ปัจจัยสำคัญที่สุด)
+    - **Age:** อายุ (มีผลต่อการช่วยเหลือเด็กก่อน)
+    - **Fare:** ราคาตั๋วเดินทาง
     """)
     
-    st.subheader("🧠 อัลกอริทึม: Ensemble Learning")
-    st.write("เราใช้ท่า **Voting Classifier** ครับ คือเอาโมเดล 3 ตัว (Random Forest, XGBoost, Logistic) มาโหวตกันว่าใครจะรอด")
+    st.subheader("🧹 การจัดการข้อมูล (Data Cleansing)")
+    st.write("เราจัดการข้อมูลที่ไม่สมบูรณ์ด้วยวิธีดังนี้:")
+    st.markdown("""
+    - **จัดการค่าว่าง (Missing Values):** ในคอลัมน์อายุ (Age) ที่หายไป เราใช้ค่า **Mean (ค่าเฉลี่ย)** มาเติมให้เต็ม
+    - **การแปลงข้อมูล (Encoding):** เปลี่ยนข้อมูลประเภทตัวอักษร 'Male/Female' ให้เป็นตัวเลข **0 และ 1** เพื่อให้โมเดลคำนวณได้
+    - **Feature Selection:** ตัดข้อมูลที่ไม่เกี่ยวข้องออก เช่น ชื่อผู้โดยสาร และเลขตั๋ว เพราะไม่มีผลทางการสถิติ
+    """)
+    
+    st.subheader("🧠 อัลกอริทึม")
+    st.write("ใช้ **Ensemble (Voting Classifier)** ที่รวมเอา Random Forest, XGBoost และ Logistic Regression มาโหวตคำตอบร่วมกัน")
 
 # --- PAGE: ML TITANIC TESTING ---
 elif page == "🔮 Titanic Testing":
@@ -98,18 +107,23 @@ elif page == "🔮 Titanic Testing":
 
 # --- PAGE: NN THEORY ---
 elif page == "🧠 AI vs Real Theory (NN)":
-    st.title("🧠 เบื้องหลัง AI แยกรูปจริง/ปลอม")
-    st.subheader("📍 แหล่งข้อมูล")
-    st.write("ใช้รูปภาพจาก Kaggle (AI vs Real Dataset) มีทั้งภาพถ่ายจริงและภาพที่เจนจาก AI")
+    st.title("🧠 ทฤษฎีโมเดลแยกรูปภาพ AI vs Real")
     
-    st.subheader("🧹 ขั้นตอนการเตรียมรูป")
+    st.subheader("📍 ที่มาของ Dataset")
+    st.write("ใช้ชุดรูปภาพจากเว็บไซต์ **Kaggle** (rhythmghai/ai-vs-real-images-dataset) รวบรวมภาพถ่ายจริงเทียบกับภาพที่เจนโดย Midjourney และ Stable Diffusion")
+    
+    st.subheader("🧬 Features (ปัจจัยที่ใช้พยากรณ์)")
+    st.write("โมเดลวิเคราะห์จาก **Pixel Data** และลวดลายของภาพ (Texture) เพื่อหาความผิดปกติที่ AI มักจะทำพลาด เช่น บริเวณขอบภาพหรือความเนียนของแสง")
+    
+    st.subheader("🧹 การจัดการข้อมูล (Data Cleansing & Preprocessing)")
     st.markdown("""
-    1. **Resize:** บีบรูปให้เหลือ 128x128 พิกเซล เพื่อให้โมเดลอ่านง่าย
-    2. **Normalize:** เปลี่ยนค่าสีจาก 0-255 ให้เหลือ 0-1 (ช่วยให้เทรนไวขึ้น)
+    - **Resizing:** เนื่องจากรูปมาหลายขนาด เราจึงต้องบีบให้เหลือ **128x128 พิกเซล** เท่ากันหมด
+    - **Normalization:** ปรับค่าสี (RGB) จาก 0-255 ให้กลายเป็น **0-1** โดยการหารด้วย 255 เพื่อให้โมเดล Neural Network ประมวลผลได้เสถียรขึ้น
+    - **Data Augmentation:** มีการหมุนและพลิกรูปภาพ เพื่อให้โมเดลเก่งขึ้นในการเจอรูปหลายๆ มุม
     """)
     
-    st.subheader("🧠 อัลกอริทึม: CNN")
-    st.write("ใช้ **Convolutional Neural Network** ซึ่งเลียนแบบการมองเห็นของคนเรา สแกนหาจุดที่ AI วาดพลาด!")
+    st.subheader("🧠 อัลกอริทึม")
+    st.write("ใช้ **CNN (Convolutional Neural Network)** ซึ่งออกแบบมาเพื่อเลียนแบบระบบประสาทการมองเห็นของมนุษย์")
 
 # --- PAGE: NN TESTING ---
 elif page == "📷 AI vs Real Testing":
@@ -126,20 +140,34 @@ elif page == "📷 AI vs Real Testing":
             label = "🤖 AI เจนฯ มาชัวร์" if score < 0.5 else "📸 ฝีมือคนถ่ายจริงๆ"
             st.subheader(f"ผลทำนาย: {label}")
 
-# --- PAGE: SLEEP HEALTH THEORY & PREDICT (รวมจบในหน้าเดียว) ---
+# --- PAGE: SLEEP HEALTH THEORY & PREDICT ---
 elif page == "💤 Sleep Health Theory & Predict":
-    st.title("💤 วิเคราะห์สุขภาพการนอนหลับ")
+    st.title("💤 ทฤษฎีวิเคราะห์สุขภาพการนอนหลับ")
     
-    with st.expander("📖 อ่านรายละเอียดโมเดล (Theory & Cleansing)"):
-        st.write("**แหล่งที่มา:** Sleep Health and Lifestyle Dataset จาก Kaggle")
-        st.write("**Features:** ดูจากเพศ, อายุ, ชั่วโมงการนอน, ระดับกิจกรรม, ความเครียด และ BMI")
+    with st.expander("📖 อ่านรายละเอียด Dataset & Cleansing (กดเพื่อขยาย)"):
+        st.subheader("📍 ที่มาของ Dataset")
+        st.write("ข้อมูลมาจาก **Kaggle** (uom190346a/sleep-health-and-lifestyle-dataset) รวบรวมข้อมูลไลฟ์สไตล์สุขภาพของคนหลากหลายอาชีพ")
+        
+        st.subheader("🧬 Features (ปัจจัยที่ใช้พยากรณ์)")
         st.markdown("""
-        **การเตรียมข้อมูล (Cleansing):**
-        * **จัดการ BMI:** เปลี่ยนกลุ่ม Normal/Obese เป็นตัวเลข 0-3
-        * **Label Encoding:** เปลี่ยนชื่อโรคที่เป็นตัวหนังสือให้ AI เข้าใจเป็นกลุ่มตัวเลข
-        * **Algorithm:** ใช้ **Random Forest** (สร้างต้นไม้ตัดสินใจหลายๆ ต้นมาช่วยกันตอบ)
+        - **Gender & Age:** เพศและอายุที่มีผลต่อสภาวะร่างกาย
+        - **Sleep Duration:** ชั่วโมงการนอนต่อคืน
+        - **Physical Activity Level:** ระดับการขยับร่างกาย (0-100)
+        - **Stress Level:** คะแนนความเครียดจากการทำงานและชีวิต
+        - **BMI Category:** รูปร่าง (Normal, Overweight, Obese)
         """)
+        
+        st.subheader("🧹 การจัดการข้อมูล (Data Cleansing)")
+        st.markdown("""
+        - **Label Encoding:** แปลงกลุ่มอาชีพและ BMI ที่เป็นข้อความให้กลายเป็นตัวเลขกลุ่ม (0, 1, 2, 3)
+        - **Handling Missing Data:** คอลัมน์ความผิดปกติทางการนอนที่ว่างอยู่ เราเติมคำว่า **'None'** เพื่อระบุว่าเป็นกลุ่มคนปกติ
+        - **Categorical Mapping:** จัดกลุ่ม BMI ที่มีความหมายคล้ายกันให้อยู่ใน Category เดียวกันเพื่อลดความซับซ้อน
+        """)
+        
+        st.subheader("🧠 อัลกอริทึม")
+        st.write("ใช้ **Random Forest Classifier** ซึ่งเด่นเรื่องการแตกกิ่งก้านการตัดสินใจ (Decision Trees) ทำให้แม่นยำสูงกับข้อมูลสายสุขภาพ")
 
+    st.divider()
     st.subheader("🧪 มาลองทดสอบสุขภาพคุณดู")
     col1, col2 = st.columns(2)
     with col1:
@@ -147,7 +175,6 @@ elif page == "💤 Sleep Health Theory & Predict":
         s_age = st.number_input("อายุคุณ (ปี)", 10, 80, 30)
         s_dur = st.slider("ชั่วโมงที่นอนต่อวัน", 4.0, 10.0, 7.0)
     with col2:
-        # เปลี่ยนจากจำนวนก้าว เป็น ระดับกิจกรรม (0-100)
         s_act = st.slider("ระดับกิจกรรมทางกาย (0-100)", 0, 100, 60)
         s_stress = st.slider("ความเครียด (1-10)", 1, 10, 5)
         s_bmi = st.selectbox("รูปร่างเป็นแบบไหน?", ["Normal", "Normal Weight", "Obese", "Overweight"])
