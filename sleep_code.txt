@@ -1,0 +1,35 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+import pickle
+
+import kagglehub
+import pandas as pd
+import os
+
+path = kagglehub.dataset_download("uom190346a/sleep-health-and-lifestyle-dataset")
+print("Path to dataset files:", path)
+
+files = os.listdir(path)
+csv_file = [f for f in files if f.endswith('.csv')][0]
+full_path = os.path.join(path, csv_file)
+
+df = pd.read_csv(full_path)
+
+df.head()
+
+df = pd.read_csv(path + "/Sleep_health_and_lifestyle_dataset.csv")
+
+df['Gender'] = df['Gender'].map({'Male': 0, 'Female': 1})
+df['BMI Category'] = df['BMI Category'].astype('category').cat.codes
+
+features = ['Gender', 'Age', 'Sleep Duration', 'Physical Activity Level', 'Stress Level', 'BMI Category']
+X = df[features]
+y = df['Sleep Disorder'].fillna('None') 
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+sleep_model = RandomForestClassifier()
+sleep_model.fit(X_train, y_train)
+
+pickle.dump(sleep_model, open('sleep_model.pkl', 'wb'))

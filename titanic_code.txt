@@ -1,0 +1,41 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from xgboost import XGBClassifier
+from sklearn.linear_model import LogisticRegression
+import pickle
+
+df = pd.read_csv('train.csv')
+
+df['Age'] = df['Age'].fillna(df['Age'].median())
+df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])
+df.drop('Cabin', axis=1, inplace=True)
+
+le = LabelEncoder()
+df['Sex'] = le.fit_transform(df['Sex'])
+df['Embarked'] = le.fit_transform(df['Embarked'])
+
+features = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked']
+X = df[features]
+y = df['Survived']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+clf1 = RandomForestClassifier(n_estimators=100, random_state=42)
+clf2 = XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+clf3 = LogisticRegression(max_iter=1000)
+
+ensemble_model = VotingClassifier(
+    estimators=[('rf', clf1), ('xgb', clf2), ('lr', clf3)],
+    voting='hard'
+)
+
+ensemble_model.fit(X_train, y_train)
+
+with open('ensemble_titanic.pkl', 'wb') as f:
+    pickle.dump(ensemble_model, f)
+
+print("Train Ensemble Model สำเร็จ และบันทึกไฟล์ .pkl เรียบร้อย!")
