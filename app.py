@@ -5,20 +5,16 @@ import pickle
 from tensorflow.keras.models import load_model
 from PIL import Image
 
-# --- CONFIG & FUTURISTIC CSS ---
 st.set_page_config(page_title="AI Project Portfolio | Pro Edition", page_icon="⚡", layout="wide")
 
-# CSS สำหรับตกแต่งสไตล์ Modern High-Tech / Futuristic Dark UI
 st.markdown("""
     <style>
-    /* ตั้งค่าพื้นหลังหลักให้เป็นสีดำลึก */
     .main { 
         background-color: #05070a; 
         color: #e0e6ed; 
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
     
-    /* สไตล์ Sidebar แบบ Glassmorphism พร้อมแสงนีออน */
     [data-testid="stSidebar"] {
         background: rgba(10, 15, 25, 0.7) !important;
         backdrop-filter: blur(10px) !important;
@@ -30,14 +26,12 @@ st.markdown("""
         background: transparent !important;
     }
     
-    /* ปรับแต่งหัวข้อ (H1, H2, H3) ให้มีแสง Glow */
     h1, h2, h3 { 
         color: #00e6ff !important; 
         font-weight: 700 !important;
         text-shadow: 0 0 10px rgba(0, 230, 255, 0.5);
     }
     
-    /* ปรับแต่งปุ่มให้ดู Modern, มี Gradient และ Glow */
     .stButton>button { 
         width: 100%; 
         border-radius: 5px; 
@@ -59,7 +53,6 @@ st.markdown("""
         color: #fff;
     }
     
-    /* ปรับแต่งช่องกรอกข้อมูล (Selectbox, Slider, etc.) */
     .stSelectbox, .stSlider, .stNumberInput { 
         background-color: #0f172a; 
         border-radius: 8px; 
@@ -71,7 +64,6 @@ st.markdown("""
         border-color: rgba(0, 230, 255, 0.5);
     }
     
-    /* สไตล์ Sidebar Radio Buttons ให้ดู Modern */
     [data-testid="stSidebar"] .stRadio > label {
         color: #60a5fa !important;
         font-weight: bold;
@@ -83,43 +75,40 @@ st.markdown("""
         padding: 5px;
     }
     
-    /* ปรับแต่ง Alert และ Info Boxes */
     .stAlert {
         border-radius: 10px;
         border: 1px solid;
     }
     
-    .stAlert.st-b8 { /* Info Box */
+    .stAlert.st-b8 { 
         background-color: rgba(30, 64, 175, 0.2);
         border-color: #1e40af;
         color: #bfdbfe;
     }
     
-    .stAlert.st-b9 { /* Success Box */
+    .stAlert.st-b9 { 
         background-color: rgba(16, 185, 129, 0.2);
         border-color: #10b981;
         color: #a7f3d0;
     }
     
-    .stAlert.st-ba { /* Warning Box */
+    .stAlert.st-ba { 
         background-color: rgba(245, 158, 11, 0.2);
         border-color: #f59e0b;
         color: #fef3c7;
     }
     
-    .stAlert.st-bb { /* Error Box */
+    .stAlert.st-bb { 
         background-color: rgba(239, 68, 68, 0.2);
         border-color: #ef4444;
         color: #fecaca;
     }
     
-    /* ปรับ Padding ให้สมดุล */
     .reportview-container .main .block-container { 
         padding-top: 3rem;
         padding-bottom: 3rem;
     }
     
-    /* ตกแต่ง Expander */
     .st-dg {
         background-color: #0f172a;
         border-radius: 10px;
@@ -128,7 +117,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 1. LOAD MODELS (Cache ไว้จะได้ลื่นๆ) ---
 @st.cache_resource
 def load_all_models():
     ml_model = pickle.load(open('ensemble_titanic.pkl', 'rb'))
@@ -141,7 +129,6 @@ try:
 except Exception as e:
     st.error(f"เฮ้ย! หาไฟล์โมเดลไม่เจอว่ะ เช็คชื่อไฟล์บน GitHub แป๊บนึงนะ: {e}")
 
-# --- 2. SIDEBAR NAVIGATION ---
 st.sidebar.markdown("# 🛠️ AI Project Hub")
 page = st.sidebar.radio("อยากไปหน้าไหนดี?", [
     "🏠 Dashboard Overview",
@@ -152,7 +139,6 @@ page = st.sidebar.radio("อยากไปหน้าไหนดี?", [
     "💤 Sleep Health Theory & Predict"
 ])
 
-# --- PAGE: DASHBOARD OVERVIEW ---
 if page == "🏠 Dashboard Overview":
     st.title("⚡ ยินดีต้อนรับเข้าสู่ AI Project Hub!")
     st.write("เว็บนี้รวมโมเดลที่เราตั้งใจทำ ทั้งสายสถิติ (ML) และสายประมวลผลภาพ (NN) รายละเอียดแต่ละตัวอยู่ข้างล่างนี้เลย!")
@@ -163,7 +149,6 @@ if page == "🏠 Dashboard Overview":
     with col2:
         st.info("### 📦 ชุดข้อมูลที่ 2: Sleep Health\nวิเคราะห์พฤติกรรมการใช้ชีวิต เพื่อประเมินความเสี่ยงโรคที่เกิดจากการนอน")
 
-# --- PAGE: ML TITANIC THEORY ---
 elif page == "📊 Titanic Theory (ML)":
     st.title("🚢 เจาะลึกโมเดล Titanic (Ensemble Learning)")
     
@@ -189,7 +174,6 @@ elif page == "📊 Titanic Theory (ML)":
     st.subheader("🧠 อัลกอริทึม")
     st.write("ใช้ **Ensemble (Voting Classifier)** ที่รวมเอา Random Forest, XGBoost และ Logistic Regression มาโหวตคำตอบร่วมกัน")
 
-# --- PAGE: ML TITANIC TESTING ---
 elif page == "🔮 Titanic Testing":
     st.title("🔮 ลองทำนายดูว่าจะรอดไหม?")
     col1, col2 = st.columns(2)
@@ -210,7 +194,6 @@ elif page == "🔮 Titanic Testing":
         else:
             st.error("💀 เสียใจด้วย... โอกาสรอดยากนิดนึงนะ")
 
-# --- PAGE: NN THEORY ---
 elif page == "🧠 AI vs Real Theory (NN)":
     st.title("🤖 ทฤษฎีโมเดลแยกรูปภาพ AI vs Real")
     
@@ -230,7 +213,6 @@ elif page == "🧠 AI vs Real Theory (NN)":
     st.subheader("🧠 อัลกอริทึม")
     st.write("ใช้ **CNN (Convolutional Neural Network)** ซึ่งออกแบบมาเพื่อเลียนแบบระบบประสาทการมองเห็นของมนุษย์")
 
-# --- PAGE: NN TESTING ---
 elif page == "📷 AI vs Real Testing":
     st.title("🖼️ ลองส่งรูปมาตรวจดู")
     uploaded_file = st.file_uploader("ส่งรูปมาเล้ยย (JPG/PNG)", type=["jpg", "png", "jpeg"])
@@ -245,7 +227,6 @@ elif page == "📷 AI vs Real Testing":
             label = "🤖 AI เจนฯ มาชัวร์" if score < 0.5 else "📸 ฝีมือคนถ่ายจริงๆ"
             st.subheader(f"ผลทำนาย: {label}")
 
-# --- PAGE: SLEEP HEALTH THEORY & PREDICT ---
 elif page == "💤 Sleep Health Theory & Predict":
     st.title("💤 ทฤษฎีวิเคราะห์สุขภาพการนอนหลับ")
     
