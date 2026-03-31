@@ -5,114 +5,106 @@ import pickle
 from tensorflow.keras.models import load_model
 from PIL import Image
 
-st.set_page_config(page_title="AI Project Portfolio | Pro Edition", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="Applied AI Portfolio", page_icon="|", layout="wide")
 
 st.markdown("""
     <style>
+    /* ปรับแต่ง UI ให้ดูเคร่งขรึมและลึกลับขึ้น ลดความแวววาวลง */
     .main { 
-        background-color: #05070a; 
-        color: #e0e6ed; 
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: #020305; 
+        color: #cfd8e3; 
+        font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
     
     [data-testid="stSidebar"] {
-        background: rgba(10, 15, 25, 0.7) !important;
-        backdrop-filter: blur(10px) !important;
-        border-right: 1px solid rgba(100, 200, 255, 0.1);
-        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+        background: rgba(8, 10, 15, 0.9) !important;
+        backdrop-filter: blur(20px) !important;
+        border-right: 1px solid rgba(75, 150, 200, 0.1);
+        box-shadow: 10px 0 20px rgba(0, 0, 0, 0.7);
     }
     
     [data-testid="stSidebar"] .sidebar-content {
         background: transparent !important;
     }
     
+    /* หัวข้อสีฟ้าไซเบอร์ ลบ Glow ที่ดูเป็นการ์ตูนออก */
     h1, h2, h3 { 
-        color: #00e6ff !important; 
-        font-weight: 700 !important;
-        text-shadow: 0 0 10px rgba(0, 230, 255, 0.5);
+        color: #00ffff !important; 
+        font-weight: 800 !important;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
     }
     
+    /* ปรับแต่งปุ่มให้ดูแข็งแกร่งและดุดัน */
     .stButton>button { 
         width: 100%; 
-        border-radius: 5px; 
-        height: 3.5em; 
-        background-image: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #00e6ff 100%); 
+        border-radius: 4px; /* ลดขอบโค้ง */
+        height: 3.8em; 
+        background-image: linear-gradient(135deg, #0a0e17 0%, #173b9e 70%, #00ffff 100%); 
         color: white; 
-        border: 1px solid rgba(0, 230, 255, 0.3); 
-        font-weight: bold; 
+        border: 1px solid rgba(0, 255, 255, 0.2); 
+        font-weight: 700; 
         font-size: 1.1em;
-        transition: all 0.3s ease;
+        transition: 0.2s ease-in-out;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
     }
     
     .stButton>button:hover { 
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(0, 230, 255, 0.6);
-        border: 1px solid #00e6ff;
-        color: #fff;
+        transform: scale(1.01);
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+        border: 1px solid #00ffff;
     }
     
+    /* ปรับแต่งช่องกรอกข้อมูลให้ดูคมชัด */
     .stSelectbox, .stSlider, .stNumberInput { 
-        background-color: #0f172a; 
-        border-radius: 8px; 
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: #0a0e17; 
+        border-radius: 4px; 
+        border: 1px solid rgba(255, 255, 255, 0.08);
         color: white;
-    }
-    
-    .stSelectbox:hover, .stSlider:hover, .stNumberInput:hover {
-        border-color: rgba(0, 230, 255, 0.5);
     }
     
     [data-testid="stSidebar"] .stRadio > label {
         color: #60a5fa !important;
-        font-weight: bold;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
     
-    [data-testid="stSidebar"] .stRadio > div {
-        background-color: rgba(255, 255, 255, 0.03);
-        border-radius: 8px;
-        padding: 5px;
-    }
-    
+    /* ปรับแต่ง Alert และ Info Boxes ให้ดู Professional */
     .stAlert {
-        border-radius: 10px;
+        border-radius: 6px;
         border: 1px solid;
     }
     
-    .stAlert.st-b8 { 
+    .stAlert.st-b8 { /* Info */
         background-color: rgba(30, 64, 175, 0.2);
         border-color: #1e40af;
         color: #bfdbfe;
     }
     
-    .stAlert.st-b9 { 
+    .stAlert.st-b9 { /* Success */
         background-color: rgba(16, 185, 129, 0.2);
         border-color: #10b981;
         color: #a7f3d0;
     }
     
-    .stAlert.st-ba { 
+    .stAlert.st-ba { /* Warning */
         background-color: rgba(245, 158, 11, 0.2);
         border-color: #f59e0b;
         color: #fef3c7;
     }
     
-    .stAlert.st-bb { 
+    .stAlert.st-bb { /* Error */
         background-color: rgba(239, 68, 68, 0.2);
         border-color: #ef4444;
         color: #fecaca;
     }
     
-    .reportview-container .main .block-container { 
-        padding-top: 3rem;
-        padding-bottom: 3rem;
-    }
-    
     .st-dg {
-        background-color: #0f172a;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: #0a0e17;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -127,153 +119,151 @@ def load_all_models():
 try:
     ml_model, nn_model, sleep_model = load_all_models()
 except Exception as e:
-    st.error(f"เฮ้ย! หาไฟล์โมเดลไม่เจอว่ะ เช็คชื่อไฟล์บน GitHub แป๊บนึงนะ: {e}")
+    st.error(f"SYSTEM ERROR: ไม่พบไฟล์โมเดลที่จำเป็นบน GitHub. ตรวจสอบไฟล์ `.pkl` และ `.h5` ({e})")
 
-st.sidebar.markdown("# 🛠️ AI Project Hub")
-page = st.sidebar.radio("อยากไปหน้าไหนดี?", [
-    "🏠 Dashboard Overview",
-    "📊 Titanic Theory (ML)", 
-    "🔮 Titanic Testing",
-    "🧠 AI vs Real Theory (NN)",
-    "📷 AI vs Real Testing",
-    "💤 Sleep Health Theory & Predict"
+st.sidebar.markdown("# | APPLIED AI HUB")
+page = st.sidebar.radio("Navigation Bar", [
+    "DASHBOARD | OVERVIEW",
+    "ML Project | Titanic Theory", 
+    "ML Project | Titanic Predictor",
+    "NN Project | Image Classifier Theory",
+    "NN Project | Image Classifier Predictor",
+    "ANALYSIS | Sleep Health (Theory & Predict)"
 ])
 
-if page == "🏠 Dashboard Overview":
-    st.title("⚡ ยินดีต้อนรับเข้าสู่ AI Project Hub!")
-    st.write("เว็บนี้รวมโมเดลที่เราตั้งใจทำ ทั้งสายสถิติ (ML) และสายประมวลผลภาพ (NN) รายละเอียดแต่ละตัวอยู่ข้างล่างนี้เลย!")
+if page == "DASHBOARD | OVERVIEW":
+    st.title("Applied AI Project Hub")
+    st.write("โครงการพัฒนาและทดสอบโมเดลปัญญาประดิษฐ์เพื่อการทำนายและวิเคราะห์ข้อมูลทางสถิติและรูปภาพ รายละเอียดและขั้นตอนการพัฒนาของแต่ละโมเดลอยู่ตามเส้นทางใน Navigation Bar ครับ")
     
     col1, col2 = st.columns(2)
     with col1:
-        st.info("### 📦 ชุดข้อมูลที่ 1: Titanic\nพยากรณ์การรอดชีวิตจากเหตุการณ์เรือล่ม โดยใช้ข้อมูลพื้นฐานของผู้โดยสาร")
+        st.info("### Project ML: Titanic Survival\nพยากรณ์การรอดชีวิตจากเหตุการณ์เรือล่ม โดยอาศัยข้อมูลเชิงสถิติของผู้โดยสารจริง")
     with col2:
-        st.info("### 📦 ชุดข้อมูลที่ 2: Sleep Health\nวิเคราะห์พฤติกรรมการใช้ชีวิต เพื่อประเมินความเสี่ยงโรคที่เกิดจากการนอน")
+        st.info("### Project Analysis: Sleep Health Disorder\nวิเคราะห์ความเสี่ยงโรคที่เกิดจากการนอนหลับผ่านข้อมูลพฤติกรรมไลฟ์สไตล์")
 
-elif page == "📊 Titanic Theory (ML)":
-    st.title("🚢 เจาะลึกโมเดล Titanic (Ensemble Learning)")
+elif page == "ML Project | Titanic Theory":
+    st.title("Model Description: Titanic Survival Analysis")
     
-    st.subheader("📍 ที่มาของ Dataset")
-    st.write("ข้อมูลชุดนี้มาจากเว็บไซต์ **Kaggle** (Titanic: Machine Learning from Disaster) ซึ่งเป็นฐานข้อมูลจริงของเรือไททานิคที่ล่มในปี 1912")
+    st.subheader("Data Source")
+    st.write("Dataset ชุดนี้ได้รับอนุญาตให้ใช้จากเว็บไซต์ **Kaggle** (Titanic: Machine Learning from Disaster) ซึ่งเป็นฐานข้อมูลจริง")
     
-    st.subheader("🧬 Features (ปัจจัยที่ใช้พยากรณ์)")
+    st.subheader("Features & Variables")
     st.markdown("""
-    - **Pclass:** ชั้นที่นั่งผู้โดยสาร (1, 2, 3) สะท้อนถึงฐานะและตำแหน่งห้องพักบนเรือ
-    - **Sex:** เพศของผู้โดยสาร (ปัจจัยสำคัญที่สุด)
-    - **Age:** อายุ (มีผลต่อการช่วยเหลือเด็กก่อน)
+    - **Pclass:** ชั้นของผู้โดยสาร (1st, 2nd, 3rd)
+    - **Sex:** เพศของผู้โดยสาร (ปัจจัยหลักทางการสถิติ)
+    - **Age:** อายุผู้โดยสาร
     - **Fare:** ราคาตั๋วเดินทาง
     """)
     
-    st.subheader("🧹 การจัดการข้อมูล (Data Cleansing)")
-    st.write("เราจัดการข้อมูลที่ไม่สมบูรณ์ด้วยวิธีดังนี้:")
+    st.subheader("Data Cleansing Pipeline")
+    st.write("กระบวนการจัดการข้อมูลก่อนนำเข้าโมเดล:")
     st.markdown("""
-    - **จัดการค่าว่าง (Missing Values):** ในคอลัมน์อายุ (Age) ที่หายไป เราใช้ค่า **Mean (ค่าเฉลี่ย)** มาเติมให้เต็ม
-    - **การแปลงข้อมูล (Encoding):** เปลี่ยนข้อมูลประเภทตัวอักษร 'Male/Female' ให้เป็นตัวเลข **0 และ 1** เพื่อให้โมเดลคำนวณได้
-    - **Feature Selection:** ตัดข้อมูลที่ไม่เกี่ยวข้องออก เช่น ชื่อผู้โดยสาร และเลขตั๋ว เพราะไม่มีผลทางการสถิติ
+    - **Imputation:** แทนที่ค่าว่างในช่อง 'Age' ด้วยค่า **Mean (ค่าเฉลี่ย)** ของข้อมูลทั้งหมด
+    - **Label Encoding:** แปลงข้อมูล 'Male/Female' เป็นค่าตัวเลข **1 และ 0**
+    - **Feature Selection:** ตัดข้อมูลที่ไม่มีผลต่อการทำนาย เช่น ชื่อ และเลขที่ตั๋วออกทั้งหมด
     """)
     
-    st.subheader("🧠 อัลกอริทึม")
-    st.write("ใช้ **Ensemble (Voting Classifier)** ที่รวมเอา Random Forest, XGBoost และ Logistic Regression มาโหวตคำตอบร่วมกัน")
+    st.subheader("Algorithm Structure")
+    st.write("ใช้สถาปัตยกรรม **Ensemble Learning** โดยใช้ Voting Classifier ที่รวมเอาโมเดล Random Forest, XGBoost และ Logistic Regression เข้าไว้ด้วยกัน")
 
-elif page == "🔮 Titanic Testing":
-    st.title("🔮 ลองทำนายดูว่าจะรอดไหม?")
+elif page == "ML Project | Titanic Predictor":
+    st.title("Titanic Survival Predictor")
     col1, col2 = st.columns(2)
     with col1:
-        pclass = st.selectbox("เลือกชั้นที่นั่ง (1=VIP, 3=ประหยัด)", [1, 2, 3])
-        sex = st.radio("เลือกเพศ", ["Male", "Female"])
-        age = st.slider("อายุเท่าไหร่?", 0, 80, 25)
+        pclass = st.selectbox("Pclass (1st, 2nd, 3rd)", [1, 2, 3])
+        sex = st.radio("Gender", ["Male", "Female"])
+        age = st.slider("Age", 0, 80, 25)
     with col2:
-        fare = st.number_input("ราคาตั๋ว (ยิ่งแพงยิ่งมีโอกาสรอดนะ)", 0.0, 500.0, 32.0)
+        fare = st.number_input("Fare (Ticket Price)", 0.0, 500.0, 32.0)
     
     if st.button("RUN PREDICTION"):
         sex_val = 1 if sex == "Male" else 0
         input_data = np.array([[pclass, sex_val, age, 0, 0, fare, 0]])
         res = ml_model.predict(input_data)
         if res[0] == 1:
-            st.balloons()
-            st.success("✅ 🎉 ยินดีด้วย! คุณมีโอกาสรอดสูงมาก")
+            st.success("PREDICTION RESULT: SURVIVED")
         else:
-            st.error("💀 เสียใจด้วย... โอกาสรอดยากนิดนึงนะ")
+            st.error("PREDICTION RESULT: NOT SURVIVED")
 
-elif page == "🧠 AI vs Real Theory (NN)":
-    st.title("🤖 ทฤษฎีโมเดลแยกรูปภาพ AI vs Real")
+elif page == "NN Project | Image Classifier Theory":
+    st.title("Model Description: AI vs Real Image Classifier")
     
-    st.subheader("📍 ที่มาของ Dataset")
-    st.write("ใช้ชุดรูปภาพจากเว็บไซต์ **Kaggle** (rhythmghai/ai-vs-real-images-dataset) รวบรวมภาพถ่ายจริงเทียบกับภาพที่เจนโดย Midjourney และ Stable Diffusion")
+    st.subheader("Data Source")
+    st.write("ชุดรูปภาพทดสอบได้รับจากเว็บไซต์ **Kaggle** (rhythmghai/ai-vs-real-images-dataset)")
     
-    st.subheader("🧬 Features (ปัจจัยที่ใช้พยากรณ์)")
-    st.write("โมเดลวิเคราะห์จาก **Pixel Data** และลวดลายของภาพ (Texture) เพื่อหาความผิดปกติที่ AI มักจะทำพลาด เช่น บริเวณขอบภาพหรือความเนียนของแสง")
+    st.subheader("Features")
+    st.write("โมเดลวิเคราะห์จาก **Pixel-level Data** และลวดลายเชิงโครงสร้างของภาพเพื่อหาความแตกต่างระหว่างภาพถ่ายจริงกับภาพที่สร้างโดย AI")
     
-    st.subheader("🧹 การจัดการข้อมูล (Data Cleansing & Preprocessing)")
+    st.subheader("Image Preprocessing Pipeline")
     st.markdown("""
-    - **Resizing:** เนื่องจากรูปมาหลายขนาด เราจึงต้องบีบให้เหลือ **128x128 พิกเซล** เท่ากันหมด
-    - **Normalization:** ปรับค่าสี (RGB) จาก 0-255 ให้กลายเป็น **0-1** โดยการหารด้วย 255 เพื่อให้โมเดล Neural Network ประมวลผลได้เสถียรขึ้น
-    - **Data Augmentation:** มีการหมุนและพลิกรูปภาพ เพื่อให้โมเดลเก่งขึ้นในการเจอรูปหลายๆ มุม
+    - **Resizing:** ปรับขนาดรูปภาพทุกใบให้เป็น **128x128 พิกเซล** เพื่อความสม่ำเสมอของ Input Tensor
+    - **Normalization:** ปรับค่าพิกเซลจาก 0-255 ให้เป็นช่วง **0-1** เพื่อเพิ่มเสถียรภาพในการเทรน Neural Network
     """)
     
-    st.subheader("🧠 อัลกอริทึม")
-    st.write("ใช้ **CNN (Convolutional Neural Network)** ซึ่งออกแบบมาเพื่อเลียนแบบระบบประสาทการมองเห็นของมนุษย์")
+    st.subheader("Algorithm Structure")
+    st.write("ใช้โครงสร้าง **CNN (Convolutional Neural Network)** สำหรับการเรียนรู้ลวดลายเชิงลึกของภาพ")
 
-elif page == "📷 AI vs Real Testing":
-    st.title("🖼️ ลองส่งรูปมาตรวจดู")
-    uploaded_file = st.file_uploader("ส่งรูปมาเล้ยย (JPG/PNG)", type=["jpg", "png", "jpeg"])
+elif page == "NN Project | Image Classifier Predictor":
+    st.title("Image Classifier: AI vs Real")
+    uploaded_file = st.file_uploader("Upload Image (JPG/PNG)", type=["jpg", "png", "jpeg"])
     if uploaded_file:
         img = Image.open(uploaded_file).convert('RGB').resize((128, 128))
-        st.image(img, caption='รูปที่ส่งมา', width=300)
-        with st.spinner('กำลังเล็ง...'):
+        st.image(img, caption='Input Image', width=300)
+        with st.spinner('Analyzing Image Structure...'):
             img_array = np.array(img) / 255.0
             img_array = np.expand_dims(img_array, axis=0)
             prediction = nn_model.predict(img_array)
             score = prediction[0][0]
-            label = "🤖 AI เจนฯ มาชัวร์" if score < 0.5 else "📸 ฝีมือคนถ่ายจริงๆ"
-            st.subheader(f"ผลทำนาย: {label}")
+            label = "Prediction: AI Generated Image" if score < 0.5 else "Prediction: Real Image"
+            st.subheader(f"{label}")
 
-elif page == "💤 Sleep Health Theory & Predict":
-    st.title("💤 ทฤษฎีวิเคราะห์สุขภาพการนอนหลับ")
+elif page == "ANALYSIS | Sleep Health (Theory & Predict)":
+    st.title("Model Description: Sleep Disorder Analysis")
     
-    with st.expander("📖 อ่านรายละเอียด Dataset & Cleansing (กดเพื่อขยาย)"):
-        st.subheader("📍 ที่มาของ Dataset")
-        st.write("ข้อมูลมาจาก **Kaggle** (uom190346a/sleep-health-and-lifestyle-dataset) รวบรวมข้อมูลไลฟ์สไตล์สุขภาพของคนหลากหลายอาชีพ")
+    with st.expander("Show Details (Theory & Cleansing Pipeline)"):
+        st.subheader("Data Source")
+        st.write("ข้อมูลมาจากเว็บไซต์ **Kaggle** (uom190346a/sleep-health-and-lifestyle-dataset)")
         
-        st.subheader("🧬 Features (ปัจจัยที่ใช้พยากรณ์)")
+        st.subheader("Features")
         st.markdown("""
-        - **Gender & Age:** เพศและอายุที่มีผลต่อสภาวะร่างกาย
-        - **Sleep Duration:** ชั่วโมงการนอนต่อคืน
-        - **Physical Activity Level:** ระดับการขยับร่างกาย (0-100)
-        - **Stress Level:** คะแนนความเครียดจากการทำงานและชีวิต
-        - **BMI Category:** รูปร่าง (Normal, Overweight, Obese)
+        - **Gender & Age**
+        - **Sleep Duration**
+        - **Physical Activity Level (0-100)**
+        - **Stress Level (1-10)**
+        - **BMI Category**
         """)
         
-        st.subheader("🧹 การจัดการข้อมูล (Data Cleansing)")
+        st.subheader("Data Cleansing Pipeline")
         st.markdown("""
-        - **Label Encoding:** แปลงกลุ่มอาชีพและ BMI ที่เป็นข้อความให้กลายเป็นตัวเลขกลุ่ม (0, 1, 2, 3)
-        - **Handling Missing Data:** คอลัมน์ความผิดปกติทางการนอนที่ว่างอยู่ เราเติมคำว่า **'None'** เพื่อระบุว่าเป็นกลุ่มคนปกติ
-        - **Categorical Mapping:** จัดกลุ่ม BMI ที่มีความหมายคล้ายกันให้อยู่ใน Category เดียวกันเพื่อลดความซับซ้อน
+        - **Feature Mapping:** จัดกลุ่มและแปลงค่า BMI Category และอาชีพให้เป็นค่าตัวเลขกลุ่ม
+        - **Managing Missing Data:** คอลัมน์ความผิดปกติทางการนอนที่ว่างอยู่ เราเติมค่า **'None'** เพื่อระบุว่าเป็นกลุ่มปกติ
+        - **Normalization:** สำหรับ Features ที่เป็นตัวเลข เช่น ชั่วโมงนอน เพื่อให้โมเดลประมวลผลได้ดีขึ้น
         """)
         
-        st.subheader("🧠 อัลกอริทึม")
-        st.write("ใช้ **Random Forest Classifier** ซึ่งเด่นเรื่องการแตกกิ่งก้านการตัดสินใจ (Decision Trees) ทำให้แม่นยำสูงกับข้อมูลสายสุขภาพ")
+        st.subheader("Algorithm Structure")
+        st.write("ใช้สถาปัตยกรรม **Random Forest Classifier** สำหรับการเรียนรู้เงื่อนไขที่ซับซ้อน")
 
     st.divider()
-    st.subheader("🧪 มาลองทดสอบสุขภาพคุณดู")
+    st.subheader("Sleep Health Analysis: Test Panel")
     col1, col2 = st.columns(2)
     with col1:
-        s_gender = st.selectbox("เลือกเพศ", ["Male", "Female"])
-        s_age = st.number_input("อายุคุณเท่าไหร่?", 10, 80, 30)
-        s_dur = st.slider("ชั่วโมงที่นอนต่อวัน", 4.0, 10.0, 7.0)
+        s_gender = st.selectbox("Gender", ["Male", "Female"])
+        s_age = st.number_input("Age", 10, 80, 30)
+        s_dur = st.slider("Sleep Duration (Hours/Day)", 4.0, 10.0, 7.0)
     with col2:
-        s_act = st.slider("ระดับกิจกรรมทางกาย (0-100)", 0, 100, 60)
-        s_stress = st.slider("ความเครียด (1-10)", 1, 10, 5)
-        s_bmi = st.selectbox("รูปร่างเป็นแบบไหน?", ["Normal", "Normal Weight", "Obese", "Overweight"])
+        s_act = st.slider("Physical Activity Level (0-100)", 0, 100, 60)
+        s_stress = st.slider("Stress Level (1-10)", 1, 10, 5)
+        s_bmi = st.selectbox("BMI Category", ["Normal", "Normal Weight", "Obese", "Overweight"])
     
-    if st.button("ANALYZE SLEEP"):
+    if st.button("RUN ANALYSIS"):
         bmi_map = {"Normal": 0, "Normal Weight": 1, "Obese": 2, "Overweight": 3}
         gen_val = 0 if s_gender == "Male" else 1
         s_input = np.array([[gen_val, s_age, s_dur, s_act, s_stress, bmi_map[s_bmi]]])
         
         try:
             s_res = sleep_model.predict(s_input)
-            st.success(f"### AI บอกว่า: {s_res[0]}")
+            st.success(f"Analysis Result: {s_res[0]}")
             if s_res[0] != "None":
-                st.warning("⚠️ เฮ้ย! ดูแลสุขภาพหน่อยนะ มีความเสี่ยงเป็นโรคนะเนี่ย")
+                st.warning("⚠️ WARNING: ข้อมูลบ่งชี้ถึงความเสี่ยง โปรดปรึกษาผู้เชี่ยวชาญทางการแพทย์เพื่อการวินิจฉัยที่ถูกต้อง")
         except Exception as e:
-            st.error(f"เกิดข้อผิดพลาดในการทำนาย: {e}")
+            st.error(f"Analysis Failed: {e}")
